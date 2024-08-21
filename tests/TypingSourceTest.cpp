@@ -1,4 +1,8 @@
 #include <gtest/gtest.h>
+
+#include <QTextStream>
+#include <QFile>
+
 #include "TypingSource.hpp"
 
 class TypingSourceTest : public ::testing::Test
@@ -92,8 +96,7 @@ protected:
 
         file.setFileName(fileName);
         file.open(QFile::Text | QFile::WriteOnly);
-        txt.setDevice(&file);
-        txt << buffer;
+        QTextStream(&file) << buffer;
         file.close();
     }
 
@@ -104,66 +107,64 @@ protected:
 
     TypingSource ts;
     QFile file;
-    QTextStream txt;
     QString buffer;
     QString fileName = "test.txt";
 };
 
-TEST_F(TypingSourceTest, EmptySourceTest)
+TEST_F(TypingSourceTest, EmptyBufferTest)
 {
-    TypingSource ts;
-
     ASSERT_EQ(ts.peekChar(), '\0');
     EXPECT_TRUE(ts.prev().isEmpty());
     EXPECT_TRUE(ts.next().isEmpty());
+    EXPECT_TRUE(ts.atEnd());
 }
 
 TEST_F(TypingSourceTest, FirstCharTest)
 {
-    TypingSource ts;
     ts.open(fileName);
 
     ASSERT_EQ(ts.peekChar(), buffer[0]);
     EXPECT_TRUE(ts.prev().isEmpty());
     EXPECT_EQ(ts.next(), buffer.first(16));
+    EXPECT_FALSE(ts.atEnd());
 }
 
 TEST_F(TypingSourceTest, BeginBufferTest)
 {
-    TypingSource ts;
     ts.open(fileName, 7);
 
     ASSERT_EQ(ts.peekChar(), buffer[7]);
     EXPECT_EQ(ts.prev(), buffer.mid(0, 7));
     EXPECT_EQ(ts.next(), buffer.mid(7, 16));
+    EXPECT_FALSE(ts.atEnd());
 }
 
 TEST_F(TypingSourceTest, MidBufferTest)
 {
-    TypingSource ts;
     ts.open(fileName, buffer.size() / 2);
 
     ASSERT_EQ(ts.peekChar(), buffer[buffer.size() / 2]);
     EXPECT_EQ(ts.prev(), buffer.mid(buffer.size() / 2 - 16, 16));
     EXPECT_EQ(ts.next(), buffer.mid(buffer.size() / 2, 16));
+    EXPECT_FALSE(ts.atEnd());
 }
 
 TEST_F(TypingSourceTest, EndBufferTest)
 {
-    TypingSource ts;
     ts.open(fileName, buffer.size() - 7);
 
     ASSERT_EQ(ts.peekChar(), buffer[buffer.size() - 7]);
     EXPECT_EQ(ts.prev(), buffer.mid(buffer.size() - 7 - 16, 16));
     EXPECT_EQ(ts.next(), buffer.mid(buffer.size() - 7, 16));
+    EXPECT_FALSE(ts.atEnd());
 }
 
 TEST_F(TypingSourceTest, LastCharTest)
 {
-    TypingSource ts;
     ts.open(fileName, buffer.size());
 
     ASSERT_EQ(ts.peekChar(), '\0');
     EXPECT_EQ(ts.prev(), buffer.last(16));
     EXPECT_TRUE(ts.next().isEmpty());
+    EXPECT_TRUE(ts.atEnd());
 }

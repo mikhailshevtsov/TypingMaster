@@ -1,7 +1,6 @@
 #ifndef TYPINGSOURCE_HPP
 #define TYPINGSOURCE_HPP
 
-#include <QTextStream>
 #include <QFile>
 
 class TypingSource
@@ -25,7 +24,6 @@ public:
     bool atEnd() const;
 
 private:
-    QTextStream mTxt;
     QFile mFile;
     QString mBuffer;
     qsizetype mVisibleTextSize = 32;

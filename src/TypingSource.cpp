@@ -1,6 +1,6 @@
 #include "TypingSource.hpp"
 
-#include <QDebug>
+#include <QTextStream>
 
 TypingSource::TypingSource()
 {}
@@ -17,9 +17,7 @@ void TypingSource::open(const QString& fileName, qsizetype startPos)
 
     mFile.setFileName(fileName);
     mFile.open(QFile::Text | QFile::ReadOnly);
-    mTxt.setDevice(&mFile);
-
-    mBuffer = mTxt.readAll().simplified();
+    mBuffer = QTextStream(&mFile).readAll().simplified();
     mCurrent = (startPos <= mBuffer.size() ? startPos : mBuffer.size());
 }
 
