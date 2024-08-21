@@ -14,14 +14,13 @@ public:
     void nextChar();
     QChar peekChar();
 
-    QString next();
-    QString prev();
+    QString next() const;
+    QString prev() const;
 
     bool seek(qsizetype pos) noexcept;
     qsizetype pos() const noexcept;
 
-    qsizetype bufferSize() const noexcept;
-    qsizetype visibleTextSize() const noexcept;
+    const QString& buffer() const noexcept;
 
     bool atEnd() const;
 
@@ -29,7 +28,6 @@ private:
     QTextStream mTxt;
     QFile mFile;
     QString mBuffer;
-    qsizetype mBufferSize = 128;
     qsizetype mVisibleTextSize = 32;
     qsizetype mCurrent = 0;
 };

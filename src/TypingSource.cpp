@@ -16,36 +16,34 @@ void TypingSource::open(const QString& fileName, qsizetype startPos)
         mFile.close();
 
     mFile.setFileName(fileName);
-    mFile.open(QFile::ReadOnly);
-
+    mFile.open(QFile::Text | QFile::ReadOnly);
     mTxt.setDevice(&mFile);
 
-    mBuffer = mTxt.read(mBufferSize).simplified();
-    mCurrent = startPos <= mBuffer.size() ? startPos : 0;
+    mBuffer = mTxt.readAll().simplified();
+    mCurrent = (startPos <= mBuffer.size() ? startPos : mBuffer.size());
 }
 
 void TypingSource::nextChar()
 {
-    if (mCurrent >= mBuffer.size() - visibleTextSize() / 2 - 1)
-    {
-        // Copy visible chars from end of buffer to its begin
-        std::copy(mBuffer.cend() - visibleTextSize(), mBuffer.cend(), mBuffer.begin());
-        mBuffer.replace(visibleTextSize(), mBufferSize, mTxt.read(mBufferSize - visibleTextSize()).simplified());
-        mCurrent = visibleTextSize() / 2;
-    }
-    else
+    if (mCurrent < mBuffer.size())
         ++mCurrent;
 }
 
 QChar TypingSource::peekChar()
 {
-    return mBuffer[mCurrent];
+    return mCurrent < mBuffer.size() ? mBuffer[mCurrent] : '\0';
 }
 
-QString TypingSource::visibleText()
+QString TypingSource::prev() const
 {
-    qsizetype begin = (mCurrent >= visibleTextSize() / 2) ? (mCurrent - visibleTextSize() / 2) : 0;
-    return mBuffer.mid(begin, visibleTextSize());
+    qsizetype begin = (mCurrent >= mVisibleTextSize / 2) ? (mCurrent - mVisibleTextSize / 2) : 0;
+    qsizetype count = (mCurrent >= mVisibleTextSize / 2) ? mVisibleTextSize / 2 : mCurrent;
+    return mBuffer.mid(begin, count);
+}
+
+QString TypingSource::next() const
+{
+    return mBuffer.mid(mCurrent, mVisibleTextSize / 2);
 }
 
 bool TypingSource::seek(qsizetype pos) noexcept
@@ -63,17 +61,12 @@ qsizetype TypingSource::pos() const noexcept
     return mCurrent;
 }
 
-qsizetype TypingSource::bufferSize() const noexcept
+const QString& TypingSource::buffer() const noexcept
 {
-    return mBufferSize;
-}
-
-qsizetype TypingSource::visibleTextSize() const noexcept
-{
-    return mVisibleTextSize;
+    return mBuffer;
 }
 
 bool TypingSource::atEnd() const
 {
-    return mTxt.atEnd();
+    return mCurrent >= mBuffer.size();
 }
