@@ -3,6 +3,7 @@
 
 #include "TypingSource.hpp"
 class TypingLine;
+class Stopwatch;
 
 #include <QMainWindow>
 
@@ -20,7 +21,10 @@ public:
 private:
     State mState = State::Inactive;
 
-    TypingLine* mTypingLine;
     TypingSource mTypingSource;
+    TypingLine* mTypingLine;
+    Stopwatch* mStopwatch;
+
+    QWidget* mCentralWgt;
 };
 #endif // TYPINGMASTERWINDOW_H
